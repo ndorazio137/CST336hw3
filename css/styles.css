@@ -1,14 +1,31 @@
 #container {
     background-color: black;
     text-align: center;
-    width: 10vw;
+    display: flex;
+    flex-direction: column;
 }
 
-/*form {*/
+#inner-container {
+    display: flex;
+    flex-direction: row;
+}
 
-/*    display: inline-block;*/
+header {
+    background-color: red;
+}
 
-/*}*/
+h1 {
+    color: white;
+}
+
+form {
+    flex: 1;
+    background-color: blue;
+    color: white;
+}
+#map-container {
+    flex: 2;
+}
 
 #mapid {
     height: 100vh;
