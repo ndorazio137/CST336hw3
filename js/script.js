@@ -1,8 +1,8 @@
 $(document).ready(function() {
 
-    /* Global openWeatherMap API variables */
-    var openWeatherMap_URL = "https://api.openweathermap.org/data/2.5/onecall";
-    var openWeatherMap_KEY = "e67228b54203e43fbc22d0372e379cb7";
+    // /* Global openWeatherMap API variables */
+    // var openWeatherMap_URL = "https://api.openweathermap.org/data/2.5/onecall";
+    // var openWeatherMap_KEY = "e67228b54203e43fbc22d0372e379cb7";
 
     /* Global openCageDate API variables */
     var openCageData_URL = "https://api.opencagedata.com/geocode/v1/geojson";
@@ -17,8 +17,14 @@ $(document).ready(function() {
     var zoomLevel = 3;
     var latlng;
     var city;
+    var state;
+    var countryName;
+    var countryCode;
     var country;
     var continent;
+    var currency;
+    var currencyName;
+    var currencySymbol;
 
     var map = L.map('mapid').setView([latitude, longitude], zoomLevel);
     var popup = L.popup();
@@ -31,7 +37,7 @@ $(document).ready(function() {
         zoomOffset: -1,
         accessToken: mapACCESS_TOKEN
     }).addTo(map);
-    
+
     map.on('click', onMapClick);
 
     function isFormValid() {
@@ -47,16 +53,10 @@ $(document).ready(function() {
         return isValid;
     }
 
-    function setLatLng(latitude, longitude) {
-        latlng = L.latLng(latitude, longitude);
-        document.getElementById("latitude").innerHTML = latitude.toString();
-        document.getElementById("longitude").innerHTML = longitude.toString();
-        popup.setLatLng(latlng);
-    }
-
     $("#form").on("submit", function(e) {
         e.preventDefault();
         isFormValid();
+        
         $.ajax({
             method: "GET",
             url: openCageData_URL,
@@ -68,16 +68,10 @@ $(document).ready(function() {
             success: function(result, status) {
                 latitude = result.features[0].geometry.coordinates[1];
                 longitude = result.features[0].geometry.coordinates[0];
-                setLatLng(latitude, longitude);
+                latlng = L.latLng(latitude, longitude);
+                popup.setLatLng(latlng);
                 map.panTo(latlng);
-
-
-                city = result.features[0].properties.components.city;
-                country = result.features[0].properties.components.country;
-                continent = result.features[0].properties.components.continent;
-                popup.setContent(latlng + "<br />" + city + "<br />" + country + "<br />" + continent);
-
-                alert(latlng + "\n" + city + "\n" + country + "\n" + continent);
+                setPopUp(result);
                 map.openPopup(popup);
 
             }
@@ -87,8 +81,48 @@ $(document).ready(function() {
     function onMapClick(e) {
         latitude = e.latlng.lat;
         longitude = e.latlng.lng;
-        setLatLng(latitude, longitude);
-        popup.setContent('some content');
-        map.openPopup(popup);
+        latlng = L.latLng(latitude, longitude);
+        
+        $.ajax({
+            method: "GET",
+            url: openCageData_URL,
+            dataType: "json",
+            data: {
+                q: latitude + longitude,
+                key: openCageData_KEY
+            },
+            success: function(result, status) {
+                popup.setLatLng(latlng);
+                setPopUp(result);
+                map.openPopup(popup);
+            }
+        }); //ajax
+    }
+
+    function setPopUp(result) {
+        city = result.features[0].properties.components.city;
+        state = result.features[0].properties.components.state;
+        countryName = result.features[0].properties.components.country;
+        countryCode = result.features[0].properties.components.country_code;
+        country = countryName + " (" + countryCode.toUpperCase() + ")";
+        continent = result.features[0].properties.components.continent;
+        currencyName = result.features[0].properties.annotations.currency.name;
+        currencySymbol = result.features[0].properties.annotations.currency.symbol;
+        currency = currencyName + " (" + currencySymbol + ")";
+
+        document.getElementById("state").innerHTML = state;
+        document.getElementById("country").innerHTML = country;
+        document.getElementById("continent").innerHTML = continent;
+        document.getElementById("latitude").innerHTML = latitude.toString();
+        document.getElementById("longitude").innerHTML = longitude.toString();
+        document.getElementById("currency").innerHTML = currency;
+
+        popup.setContent("<strong>City:</strong> " + city +
+            "<br /><strong>State:</strong> " + state +
+            "<br /><strong>Country:</strong> " + country +
+            "<br /><strong>Continent:</strong> " + continent +
+            "<br /><strong>Latitude:</strong> " + latitude +
+            "<br /><strong>Longitude:</strong> " + longitude +
+            "<br /><strong>Currency:</strong> " + currency);
     }
 }); // ready
