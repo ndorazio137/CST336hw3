@@ -68,8 +68,15 @@ $(document).ready(function() {
     map.on('click', onMapClick);
 
     function onMapClick(e) {
-
-
+        alert("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng);
+        latitude = e.latlng.lat;
+        longitude = e.latlng.lng;
+        latlng = L.latLng(latitude, longitude);
+        document.getElementById("latitude").innerHTML = latitude.toString();
+        document.getElementById("longitude").innerHTML = longitude.toString();
+        popup.setLatLng(latlng);
+        popup.setContent('some content');
+        map.openPopup(popup);
     }
 
 
