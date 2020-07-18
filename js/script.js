@@ -31,11 +31,32 @@ $(document).ready(function() {
         zoomOffset: -1,
         accessToken: mapACCESS_TOKEN
     }).addTo(map);
+    
+    map.on('click', onMapClick);
 
+    function isFormValid() {
+        $("#validationFdbk").html(""); //resets validation feedback
 
-    $("#city").on("change", function(e) {
+        let isValid = true;
+        if ($("#city").val() == "") {
+            isValid = false;
+            $("#validationFdbk").html("Please enter a city");
+            $("validationFdbk").attr("class", "bg-warning text-white");
+        }
+
+        return isValid;
+    }
+
+    function setLatLng(latitude, longitude) {
+        latlng = L.latLng(latitude, longitude);
+        document.getElementById("latitude").innerHTML = latitude.toString();
+        document.getElementById("longitude").innerHTML = longitude.toString();
+        popup.setLatLng(latlng);
+    }
+
+    $("#form").on("submit", function(e) {
         e.preventDefault();
-        //alert("city clicked");
+        isFormValid();
         $.ajax({
             method: "GET",
             url: openCageData_URL,
@@ -47,60 +68,27 @@ $(document).ready(function() {
             success: function(result, status) {
                 latitude = result.features[0].geometry.coordinates[1];
                 longitude = result.features[0].geometry.coordinates[0];
-                latlng = L.latLng(latitude, longitude);
-                document.getElementById("latitude").innerHTML = latitude.toString();
-                document.getElementById("longitude").innerHTML = longitude.toString();
+                setLatLng(latitude, longitude);
+                map.panTo(latlng);
+
+
                 city = result.features[0].properties.components.city;
                 country = result.features[0].properties.components.country;
                 continent = result.features[0].properties.components.continent;
-                popup.setLatLng(latlng);
-                map.panTo(latlng);
-                popup.setContent(latlng + " " + city + " " + country + " " + continent);
-                
-                alert(latlng + " " + city + " " + country + " " + continent);
+                popup.setContent(latlng + "<br />" + city + "<br />" + country + "<br />" + continent);
+
+                alert(latlng + "\n" + city + "\n" + country + "\n" + continent);
                 map.openPopup(popup);
-                
+
             }
         }); //ajax
     });
 
-
-    map.on('click', onMapClick);
-
     function onMapClick(e) {
-        alert("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng);
         latitude = e.latlng.lat;
         longitude = e.latlng.lng;
-        latlng = L.latLng(latitude, longitude);
-        document.getElementById("latitude").innerHTML = latitude.toString();
-        document.getElementById("longitude").innerHTML = longitude.toString();
-        popup.setLatLng(latlng);
+        setLatLng(latitude, longitude);
         popup.setContent('some content');
         map.openPopup(popup);
     }
-
-
-
-
-
-
-
-
-
-
-
-    // $("#submit").on("click", function(event) {
-    //     event.preventDefault();
-    //     $.ajax({
-    //         method: "GET",
-    //         url: openWeatherMap_URL,
-    //         dataType: "json",
-    //         success: function(result, status) {
-    //             alert("success");
-    //         }
-    //     }); // ajax	
-    // }); // btnSubmit
-
-
-
 }); // ready
