@@ -1,5 +1,9 @@
+body {
+    margin: 0%;
+}
+
 #container {
-    background-color: black;
+    width: 100vw;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -20,11 +24,12 @@ h1 {
 
 form {
     flex: 1;
-    background-color: blue;
+    background-color: black;
     color: white;
 }
 #map-container {
     flex: 2;
+    
 }
 
 #mapid {
