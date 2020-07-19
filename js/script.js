@@ -1,9 +1,5 @@
 $(document).ready(function() {
 
-    // /* Global openWeatherMap API variables */
-    // var openWeatherMap_URL = "https://api.openweathermap.org/data/2.5/onecall";
-    // var openWeatherMap_KEY = "e67228b54203e43fbc22d0372e379cb7";
-
     /* Global openCageDate API variables */
     var openCageData_URL = "https://api.opencagedata.com/geocode/v1/geojson";
     var openCageData_KEY = "410c8631fa9d4b9ab6fbfefd617f2922";
@@ -15,6 +11,8 @@ $(document).ready(function() {
     var latitude = 40;
     var longitude = -100;
     var zoomLevel = 3;
+    
+    /* Aside and popup variables from openCageData API */
     var latlng;
     var city;
     var state;
@@ -26,6 +24,7 @@ $(document).ready(function() {
     var currencyName;
     var currencySymbol;
 
+    /* create map variables */
     var map = L.map('mapid').setView([latitude, longitude], zoomLevel);
     var popup = L.popup();
 
@@ -36,10 +35,12 @@ $(document).ready(function() {
         tileSize: 512,
         zoomOffset: -1,
         accessToken: mapACCESS_TOKEN
-    }).addTo(map);
-
+    });
+    
+    streets.addTo(map);
     map.on('click', onMapClick);
 
+    // Validates city search text field.
     function isFormValid() {
         $("#validationFdbk").html(""); //resets validation feedback
 
@@ -53,11 +54,13 @@ $(document).ready(function() {
         return isValid;
     }
 
+    // Deals with generating info from form submissions.
     $("#form").on("submit", function(e) {
         e.preventDefault();
         isFormValid();
         
         $.ajax({
+            async: false,
             method: "GET",
             url: openCageData_URL,
             dataType: "json",
@@ -78,12 +81,15 @@ $(document).ready(function() {
         }); //ajax
     });
 
+    // Deals with generating info from clicking the map.
     function onMapClick(e) {
+        // e.latlng has some coordinate problem still.
         latitude = e.latlng.lat;
         longitude = e.latlng.lng;
         latlng = L.latLng(latitude, longitude);
         
         $.ajax({
+            async: false,
             method: "GET",
             url: openCageData_URL,
             dataType: "json",
@@ -99,6 +105,7 @@ $(document).ready(function() {
         }); //ajax
     }
 
+    // Gets components from API and sets the side bar and popup.
     function setPopUp(result) {
         city = result.features[0].properties.components.city;
         state = result.features[0].properties.components.state;
